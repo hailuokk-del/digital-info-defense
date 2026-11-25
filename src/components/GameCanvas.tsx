@@ -3,6 +3,7 @@ import { Shield, Eye, Zap, Pause, Play, Sparkles, AlertTriangle, HelpCircle } fr
 import { AIConfig, CategoryStat, GameReport, InfoCardData, MistakeRecord } from '../types';
 import { soundFX } from '../utils/sound';
 import { GameSprites, loadGameSprites } from '../utils/sprites';
+import { generateWaveCards } from '../utils/aiClient';
 
 interface Props {
   aiConfig: AIConfig;
@@ -255,16 +256,7 @@ export const GameCanvas: React.FC<Props> = ({ aiConfig, onGameOver, onExit }) =>
       const weak = getWeakCategories();
 
       try {
-        const res = await fetch('/api/generate-wave', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...aiConfig,
-            wave: targetWave,
-            weakCategories: weak,
-          }),
-        });
-        const data = await res.json();
+        const data = await generateWaveCards(aiConfig, targetWave, weak);
         const cards: InfoCardData[] = Array.isArray(data.cards) ? data.cards : [];
         st.spawnQueue.push(...cards);
 

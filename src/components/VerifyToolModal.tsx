@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Search, ShieldAlert, ShieldCheck, Loader2, Sparkles } from 'lucide-react';
 import { AIConfig, AnalyzeResult } from '../types';
+import { analyzeMessage } from '../utils/aiClient';
 
 interface Props {
   aiConfig: AIConfig;
@@ -21,26 +22,9 @@ export const VerifyToolModal: React.FC<Props> = ({ aiConfig, onClose }) => {
   const handleAnalyze = async () => {
     if (!text.trim()) return;
     setLoading(true);
-    try {
-      const res = await fetch('/api/analyze-message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...aiConfig, text }),
-      });
-      const data = await res.json();
-      setResult(data);
-    } catch {
-      setResult({
-        source: 'error',
-        riskScore: 50,
-        verdict: '分析服务暂不可用',
-        category: '网络异常',
-        highlights: [],
-        advice: '请检查后端服务是否启动，或直接拨打 96110 反诈热线核实。',
-      });
-    } finally {
-      setLoading(false);
-    }
+    const data = await analyzeMessage(aiConfig, text);
+    setResult(data);
+    setLoading(false);
   };
 
   return (

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Cpu, CheckCircle2, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 import { AIConfig, AIProvider } from '../types';
+import { testAIConnection } from '../utils/aiClient';
 
 interface Props {
   config: AIConfig;
@@ -30,19 +31,9 @@ export const AISettingsModal: React.FC<Props> = ({ config, onSave, onClose }) =>
   const handleTest = async () => {
     setTesting(true);
     setTestResult(null);
-    try {
-      const res = await fetch('/api/test-ai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider, apiKey, model }),
-      });
-      const data = await res.json();
-      setTestResult({ ok: Boolean(data.ok), msg: data.message });
-    } catch {
-      setTestResult({ ok: false, msg: '无法连接到本地后端服务，请确认已运行 npm run dev' });
-    } finally {
-      setTesting(false);
-    }
+    const data = await testAIConnection({ provider, apiKey, model });
+    setTestResult({ ok: Boolean(data.ok), msg: data.message });
+    setTesting(false);
   };
 
   const handleSave = () => {
